@@ -14,7 +14,7 @@ contract Staking {
 
     uint256 public accumulatedTokenReward;
 
-    uint256 public rewardPerToken;
+    uint256 public rewardPerTokenStored;
 
     uint256 public lastUpdateTime;
 
@@ -36,10 +36,15 @@ contract Staking {
         // code here
     }
 
-    function earned() public view returns (uint256) {
-        // transfer STK tokens from this contract to sender
+    function earned(address _user) public view returns (uint256 earnedAmount) {
+        earnedAmount = stakedBalance[_user] * (rewardPerTokenStored - userRewardPerTokenPaid[_user]) / 1e18 + rewards[_user];   
+    }
 
-        // code here
+    function rewardPerToken() public view returns (uint256) {
+        if (totalStaked == 0) {
+            return rewardPerTokenStored;
+        }
+        return rewardPerTokenStored + (block.timestamp - lastUpdateTime) * rewardRate * 1e18 / totalStaked;
     }
 
     function updateReward(address _account) public {
